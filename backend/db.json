@@ -1,0 +1,12 @@
+{
+  "items": [
+    {
+      "id": "starter-1",
+      "title": "Замените демонстрационную запись",
+      "category": "starter",
+      "value": 0,
+      "isActive": true
+    }
+  ]
+}
+

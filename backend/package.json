@@ -1,0 +1,16 @@
+{
+  "name": "lesson-1-6-http-and-api-homework-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Учебный REST API для домашней работы по HTTP, Fetch API и состояниям интерфейса",
+  "scripts": {
+    "dev": "json-server db.json --port 3000",
+    "start": "json-server db.json --port 3000"
+  },
+  "devDependencies": {
+    "json-server": "1.0.0-beta.15"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
