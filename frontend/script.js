@@ -4,6 +4,7 @@
 console.log('API storefront starter is ready');
 
 const API_URL = "http://localhost:3000/books"
+const REQUEST_TIMEOUT = 5000
 
 const collection = document.querySelector('[data-ui="collection"]')
 const status = document.querySelector('[data-ui="status"]')
@@ -20,6 +21,44 @@ let editingBook = null
 let isBusy = false
 
 document.querySelector('[data-ui="endpoint"]').textContent = API_URL
+
+async function apiRequest(url, options = {}, readJson = true) {
+  const controller = new AbortController()
+  let timedOut = false
+  const timeoutId = setTimeout(() => {
+    timedOut = true
+    controller.abort()
+  }, REQUEST_TIMEOUT)
+
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal })
+
+    if (!response.ok) {
+      const error = new Error(`HTTP ${response.status}`)
+      error.status = response.status
+      throw error
+    }
+
+    const data = readJson ? await response.json() : null
+    return { response, data }
+  } catch (error) {
+    if (timedOut) {
+      const timeoutError = new Error("Превышено время ожидания")
+      timeoutError.name = "TimeoutError"
+      throw timeoutError
+    }
+    throw error
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
+function getErrorMessage(error) {
+  if (error.name === "TimeoutError") return "Сервер не ответил за 5 секунд. Попробуйте снова."
+  if (error.status === 404) return "Ошибка 404: ресурс не найден."
+  if (error.status) return `Ошибка HTTP ${error.status}. Попробуйте снова.`
+  return "Нет соединения с API. Проверьте, что сервер запущен."
+}
 
 function setBusy(value) {
   isBusy = value
@@ -70,13 +109,9 @@ async function deleteBook(book) {
   setBusy(true)
 
   try {
-    const response = await fetch(`${API_URL}/${encodeURIComponent(book.id)}`, {
+    await apiRequest(`${API_URL}/${encodeURIComponent(book.id)}`, {
       method: "DELETE"
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`)
-    }
+    }, false)
 
     if (editingBook?.id === book.id) {
       cancelEditing()
@@ -86,8 +121,8 @@ async function deleteBook(book) {
   } catch (error) {
     console.error("Не удалось удалить книгу", error)
     status.className = "status status--error"
-    statusTitle.textContent = "Ошибка удаления"
-    statusText.textContent = "Не удалось удалить книгу. Попробуйте снова."
+    statusTitle.textContent = error.name === "TimeoutError" ? "Тайм-аут" : "Ошибка удаления"
+    statusText.textContent = getErrorMessage(error)
     collection.hidden = false
   } finally {
     setBusy(false)
@@ -154,13 +189,7 @@ async function loadBooks() {
   reloadButton.disabled = true
 
   try {
-    const response = await fetch(API_URL)
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`)
-    }
-
-    const books = await response.json()
+    const { response, data: books } = await apiRequest(API_URL)
 
     console.log(response)
     console.log(books)
@@ -168,7 +197,8 @@ async function loadBooks() {
     renderBooks(books)
   } catch (error) {
     console.error("Не удалось загрузить книги", error)
-    setListState("error", "Ошибка загрузки", "Не удалось получить книги. Проверьте API и нажмите «Обновить».")
+    const title = error.name === "TimeoutError" ? "Тайм-аут" : error.status === 404 ? "Ошибка 404" : "Ошибка загрузки"
+    setListState("error", title, getErrorMessage(error))
   } finally {
     reloadButton.disabled = isBusy
   }
@@ -207,7 +237,7 @@ bookForm.addEventListener("submit", async (event) => {
   try {
     const wasEditing = Boolean(editingBook)
     const url = wasEditing ? `${API_URL}/${encodeURIComponent(editingBook.id)}` : API_URL
-    const response = await fetch(url, {
+    const { data: savedBook } = await apiRequest(url, {
       method: wasEditing ? "PATCH" : "POST",
       headers: {
         "Content-Type": "application/json"
@@ -215,11 +245,6 @@ bookForm.addEventListener("submit", async (event) => {
       body: JSON.stringify(wasEditing ? changes : book)
     })
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`)
-    }
-
-    const savedBook = await response.json()
     console.log(savedBook)
 
     cancelEditing()
@@ -227,7 +252,7 @@ bookForm.addEventListener("submit", async (event) => {
     await loadBooks()
   } catch (error) {
     console.error("Не удалось сохранить книгу", error)
-    submitStatus.textContent = "Не удалось сохранить книгу. Проверьте API и попробуйте снова."
+    submitStatus.textContent = getErrorMessage(error)
   } finally {
     setBusy(false)
   }
