@@ -1,3 +1,4 @@
+
 // Стартовая точка домашней работы.
 // Спроектируйте модель ресурса, запросы и состояния самостоятельно.
 
@@ -58,6 +59,10 @@ function getErrorMessage(error) {
   if (error.status === 404) return "Ошибка 404: ресурс не найден."
   if (error.status) return `Ошибка HTTP ${error.status}. Попробуйте снова.`
   return "Нет соединения с API. Проверьте, что сервер запущен."
+}
+
+function normalizeTitle(title) {
+  return title.trim().replace(/\s+/g, " ").toLowerCase()
 }
 
 function setBusy(value) {
@@ -216,6 +221,11 @@ bookForm.addEventListener("submit", async (event) => {
     year: Number(formData.get("year"))
   }
 
+  if (book.title.length < 2 || book.author.length < 2) {
+    submitStatus.textContent = "Название и автор должны содержать минимум 2 символа."
+    return
+  }
+
   const changes = {}
 
   if (editingBook) {
@@ -236,6 +246,21 @@ bookForm.addEventListener("submit", async (event) => {
 
   try {
     const wasEditing = Boolean(editingBook)
+    const { data: books } = await apiRequest(API_URL)
+
+    const duplicate = books.some(existing =>
+      normalizeTitle(existing.title) === normalizeTitle(book.title) &&
+      normalizeTitle(existing.author) === normalizeTitle(book.author) &&
+      normalizeTitle(existing.genre) === normalizeTitle(book.genre) &&
+      Number(existing.year) === book.year &&
+      (!wasEditing || String(existing.id) !== String(editingBook.id))
+    )
+
+    if (duplicate) {
+      submitStatus.textContent = "Книга с такими данными уже существует."
+      return
+    }
+
     const url = wasEditing ? `${API_URL}/${encodeURIComponent(editingBook.id)}` : API_URL
     const { data: savedBook } = await apiRequest(url, {
       method: wasEditing ? "PATCH" : "POST",
