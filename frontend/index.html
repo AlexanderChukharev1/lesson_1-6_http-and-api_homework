@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Стартовый интерфейс домашней работы по HTTP и REST API"
+      content="Каталог книг с данными из REST API"
     />
-    <title>API-витрина</title>
+    <title>Каталог книг</title>
     <link rel="stylesheet" href="./styles.css" />
     <script src="./script.js" defer></script>
   </head>
@@ -15,10 +15,9 @@
     <header class="page-header">
       <div class="page-header__content">
         <p class="page-header__eyebrow">ДЗ 6 · HTTP и API</p>
-        <h1 class="page-header__title">API-витрина</h1>
+        <h1 class="page-header__title">Каталог книг</h1>
         <p class="page-header__lead">
-          Выберите тему, замените демонстрационный ресурс и свяжите этот интерфейс
-          с собственным REST API.
+          Книги загружаются с локального REST API и отображаются в карточках.
         </p>
       </div>
     </header>
@@ -28,7 +27,7 @@
         <div class="panel__header">
           <div>
             <p class="panel__eyebrow">Коллекция</p>
-            <h2 class="panel__title" id="collection-title">Объекты из API</h2>
+            <h2 class="panel__title" id="collection-title">Книги из API</h2>
           </div>
 
           <button class="button button--secondary" type="button" data-action="reload">
@@ -38,12 +37,12 @@
 
         <p class="endpoint">
           Endpoint:
-          <code class="endpoint__value" data-ui="endpoint">http://localhost:3000/items</code>
+          <code class="endpoint__value" data-ui="endpoint">http://localhost:3000/books</code>
         </p>
 
         <div class="status" data-ui="status" role="status" aria-live="polite">
-          <strong class="status__title">Ожидание подключения</strong>
-          <span class="status__text">Реализуйте первый GET-запрос в script.js.</span>
+          <strong class="status__title">Подключение к API</strong>
+          <span class="status__text">Загружаем книги…</span>
         </div>
 
         <div class="collection" data-ui="collection" aria-live="polite"></div>
@@ -92,4 +91,3 @@
     </footer>
   </body>
 </html>
-
