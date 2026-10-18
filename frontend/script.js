@@ -10,6 +10,9 @@ const status = document.querySelector('[data-ui="status"]')
 const statusTitle = status.querySelector(".status__title")
 const statusText = status.querySelector(".status__text")
 const reloadButton = document.querySelector('[data-action="reload"]')
+const bookForm = document.querySelector('[data-form="entry"]')
+const submitButton = document.querySelector('[data-action="submit"]')
+const submitStatus = document.querySelector('[data-ui="submit-status"]')
 
 document.querySelector('[data-ui="endpoint"]').textContent = API_URL
 
@@ -85,6 +88,47 @@ async function loadBooks() {
     reloadButton.disabled = false
   }
 }
+
+bookForm.addEventListener("submit", async (event) => {
+  event.preventDefault()
+
+  submitButton.disabled = true
+  submitStatus.textContent = "Отправляем книгу…"
+
+  const formData = new FormData(bookForm)
+  const book = {
+    title: formData.get("title").trim(),
+    author: formData.get("author").trim(),
+    genre: formData.get("genre"),
+    year: Number(formData.get("year"))
+  }
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(book)
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    const createdBook = await response.json()
+    console.log(createdBook)
+
+    bookForm.reset()
+    submitStatus.textContent = "Книга успешно добавлена."
+    await loadBooks()
+  } catch (error) {
+    console.error("Не удалось добавить книгу", error)
+    submitStatus.textContent = "Не удалось добавить книгу. Проверьте API и попробуйте снова."
+  } finally {
+    submitButton.disabled = false
+  }
+})
 
 reloadButton.addEventListener("click", loadBooks)
 loadBooks()

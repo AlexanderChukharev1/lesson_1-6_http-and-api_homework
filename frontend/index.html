@@ -52,7 +52,7 @@
         <div class="panel__header">
           <div>
             <p class="panel__eyebrow">Новая запись</p>
-            <h2 class="panel__title" id="form-title">Добавить объект</h2>
+            <h2 class="panel__title" id="form-title">Добавить книгу</h2>
           </div>
         </div>
 
@@ -65,21 +65,62 @@
               name="title"
               type="text"
               minlength="2"
-              placeholder="Замените подсказку под свою тему"
+              placeholder="Название книги"
               required
             />
           </div>
 
-          <p class="entry-form__hint">
-            Добавьте остальные поля своей модели. Всего должно быть не меньше четырех
-            содержательных свойств помимо id.
-          </p>
+          <div class="field">
+            <label class="field__label" for="entry-author">Автор</label>
+            <input
+              class="field__control"
+              id="entry-author"
+              name="author"
+              type="text"
+              minlength="2"
+              placeholder="Имя автора"
+              required
+            />
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="entry-genre">Жанр</label>
+            <select class="field__control" id="entry-genre" name="genre" required>
+              <option value="">Выберите жанр</option>
+              <option value="Роман">Роман</option>
+              <option value="Повесть">Повесть</option>
+              <option value="Роман в стихах">Роман в стихах</option>
+              <option value="Рассказы">Рассказы</option>
+              <option value="Поэзия">Поэзия</option>
+              <option value="Научная литература">Научная литература</option>
+              <option value="Учебная литература">Учебная литература</option>
+              <option value="Другое">Другое</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="entry-year">Год издания</label>
+            <input
+              class="field__control"
+              id="entry-year"
+              name="year"
+              type="number"
+              min="1"
+              step="1"
+              placeholder="Год издания"
+              required
+            />
+          </div>
+
+          <p class="entry-form__hint">Все четыре поля обязательны.</p>
 
           <div class="entry-form__actions">
             <button class="button button--primary" type="submit" data-action="submit">
               Отправить в API
             </button>
           </div>
+
+          <p class="entry-form__hint" data-ui="submit-status" role="status" aria-live="polite"></p>
         </form>
       </section>
     </main>
